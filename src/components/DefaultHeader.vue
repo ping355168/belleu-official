@@ -1,45 +1,88 @@
 <template>
+    <!-- 頁首區塊，根據捲動狀態加上 scrolled 類別 -->
     <header :class="{ scrolled: isScrolled }">
+
+        <!-- 左邊：LOGO 與導航連結 -->
         <div class="header-left">
             <div class="header-logo">
                 <router-link to="/" class="logo-link">BELLEU</router-link>
             </div>
             <nav>
-                <router-link to="/" class="nav-link">最新商品</router-link>
-                <router-link to="/" class="nav-link">熱門商品</router-link>
-                <router-link to="/" class="nav-link">上身商品</router-link>
-                <router-link to="/" class="nav-link">下身商品</router-link>
+                <router-link to="#" class="nav-link">最新商品</router-link>
+                <router-link to="#" class="nav-link">熱門商品</router-link>
+                <router-link to="#" class="nav-link">上身商品</router-link>
+                <router-link to="#" class="nav-link">下身商品</router-link>
             </nav>
         </div>
+
+        <!-- 右邊：搜尋欄與會員功能 -->
         <div class="header-right">
+            <!-- 搜尋區 -->
             <div class="search">
                 <input type="text" class="input">
-                <router-link to="/" class="search-logo">
+                <router-link to="#" class="search-logo">
                     <font-awesome-icon icon="fa-solid fa-magnifying-glass" />
                 </router-link>
             </div>
-            <router-link to="/" class="nav-link">登入</router-link>
-            <router-link to="/" class="nav-link">註冊</router-link>
+
+            <!-- 判斷登入狀態 -->
+            <template v-if="user">
+                <span class="nav-link user-email">{{ user.email }}</span>
+                <button class="nav-link logout-btn" @click="logout">登出</button>
+            </template>
+            <template v-else>
+                <router-link to="/login" class="nav-link">登入</router-link>
+                <router-link to="/register" class="nav-link">註冊</router-link>
+            </template>
+
         </div>
+
     </header>
 </template>
 
 <script setup>
 import { ref, onMounted, onUnmounted } from 'vue'
+import { useRouter } from 'vue-router'
+import Swal from 'sweetalert2'
 
+
+const router = useRouter()
 const isScrolled = ref(false)
+const user = ref(null)
 
+// 捲動效果
 const handleScroll = () => {
     isScrolled.value = window.scrollY > 0
 }
-
 onMounted(() => {
     window.addEventListener('scroll', handleScroll)
-})
 
+    // 嘗試從 localStorage 讀取登入資料
+    const stored = localStorage.getItem('user')
+    if (stored) {
+        user.value = JSON.parse(stored)
+    }
+})
 onUnmounted(() => {
     window.removeEventListener('scroll', handleScroll)
 })
+
+// 登出邏輯
+const logout = async () => {
+  localStorage.removeItem('user')
+  user.value = null
+
+  await Swal.fire({
+    icon: 'info',
+    title: '已登出',
+    text: '期待下次見面 👋',
+    timer: 1600,
+    showConfirmButton: false
+  })
+
+  router.push('/')
+}
+
 </script>
 
 <style scoped>
@@ -130,4 +173,22 @@ nav {
 .scrolled .input {
     border-bottom: 1px solid #4B4237;
 }
+.user-email {
+  font-weight: bold;
+  color: inherit;
+  margin-left: 16px;
+}
+
+.logout-btn {
+  background: none;
+  border: none;
+  font-weight: bold;
+  color: inherit;
+  cursor: pointer;
+  padding: 10px 20px;
+}
+.logout-btn:hover {
+  text-decoration: underline;
+}
+
 </style>

@@ -1,21 +1,30 @@
 <template>
-    <article>
-        <div class="title">
-            <h1>什麼是Belleu？</h1>
-            <p>我們希望成為螢幕彼岸的你 最溫暖的購物夥伴 <br>
-                從日常需求的時尚單品，到讓您在重要時刻閃耀的精緻服裝，我們都將陪伴在你的身旁。</p>
-        </div>
+    <!-- 品牌簡介區 -->
+    <section class="brand-intro">
 
-        <div class="swiper-box">
+        <!-- 區塊標題與描述 -->
+        <header>
+            <h2>什麼是Belleu？</h2>
+            <p>我們希望成為你最溫暖的購物夥伴。</p>
+        </header>
+
+        <!-- Swiper 輪播區 -->
+        <div class="slider-wrapper">
+
+            <!-- 左右滑動按鈕 -->
             <div class="button-group">
                 <div @click="slidePrev" class="swiper-button-prev"></div>
                 <div @click="slideNext" class="swiper-button-next"></div>
             </div>
+
+            <!-- Swiper 主體設定 -->
             <swiper ref="mySwiper" @swiper="onSwiperInit" :loop="true" :spaceBetween="20" :breakpoints="{
                 0: { slidesPerView: 1 },
                 640: { slidesPerView: 2 },
                 1024: { slidesPerView: 4 }
             }">
+
+                <!-- 每個 slide 對應一張圖片與標語 -->
                 <swiper-slide>
                     <img src="/image/speicial_event_1.jpg" alt="" class="swiper">
                     <h6>因為好看所以1+1🖤</h6>
@@ -58,100 +67,87 @@
                 </swiper-slide>
             </swiper>
         </div>
-    </article>
+    </section>
 </template>
 
 <script setup>
+// 匯入必要功能
 import { ref, onMounted, onBeforeUnmount } from 'vue'
 import { Swiper, SwiperSlide } from 'swiper/vue'
 import 'swiper/css'
 
+// 儲存 Swiper 實體
 const mySwiper = ref(null)
 
+// 初始化時取得 Swiper 實體
 const onSwiperInit = (swiperInstance) => {
     mySwiper.value = swiperInstance
 }
 
+// 左右切換控制函式
 const slidePrev = () => {
     mySwiper.value.slidePrev()
 }
-
 const slideNext = () => {
     mySwiper.value.slideNext()
 }
 
+// 畫面尺寸改變時更新 Swiper
 const updateSwiperOnResize = () => {
     if (mySwiper.value) {
         mySwiper.value.update()
     }
 }
 
+// 掛載與移除 resize 事件
 onMounted(() => {
     window.addEventListener('resize', updateSwiperOnResize)
 })
-
 onBeforeUnmount(() => {
     window.removeEventListener('resize', updateSwiperOnResize)
 })
-
 </script>
 
+
 <style scoped>
-/* 整個區塊容器 */
-article {
+.brand-intro {
     color: #736B60;
     display: flex;
-    /* 垂直排列子元素 */
     flex-direction: column;
     gap: 40px;
-    /* 區塊之間的垂直間距 */
     background-color: #F6F4EE;
-    /* 米白色背景 */
     padding: 100px 150px;
-    /* 上下左右內距 */
     box-sizing: border-box;
-    /* 包含 padding 在寬高內計算 */
     overflow: hidden;
-    /* 隱藏溢出的內容（保險用） */
 }
 
-/* 標題區容器 */
-.title {
+header {
     display: flex;
-    /* 垂直排列 h1 和 p */
     flex-direction: column;
 }
 
-/* 主標題 */
-h1 {
+h2 {
     text-align: center;
-    /* 置中對齊 */
     font-size: 20px;
-    /* 字體大小 */
     font-weight: bold;
-    /* 粗體 */
 }
 
-/* 主標題下方的介紹文字 */
 p {
     text-align: center;
     font-size: 16px;
 }
 
-/* Swiper 輪播圖片寬度設定 */
 .swiper {
     width: 100%;
-    /* 滿版寬度 */
 }
 
-.swiper-box {
+.slider-wrapper {
     position: relative;
     max-width: 1200px;
     width: 100%;
     margin: 0 auto;
 }
 
-/* 漂浮箭頭往外一點點 */
 ::v-deep(.swiper-button-prev) {
     left: -50px;
     color: #4B4237;

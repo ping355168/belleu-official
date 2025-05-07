@@ -1,12 +1,19 @@
 <script setup>
 import AltHeader from '@/components/AltHeader.vue';
-import product from '@/components/product.vue';
-
+import Product from '@/components/Product.vue';
+import FloatingCart from '@/components/FloatingCart.vue';
+import DefaultFooter from '@/components/DefaultFooter.vue';
 </script>
 
 <template>
-    <AltHeader />
-    <product />
+    <FloatingCart/>
+    <AltHeader/>
+    <Product/>
+    <DefaultFooter/>
+
 </template>
 
-<style scoped></style>
+<style scoped>
+
+
+</style>

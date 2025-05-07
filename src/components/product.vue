@@ -1,185 +1,199 @@
 <template>
-    <main>
-        <aside>
-            <swiper :navigation="true" :modules="modules" class="mySwiper">
-                <swiper-slide><img src="/image/item_1.jpg" alt="" class="swiper"></swiper-slide>
-                <swiper-slide><img src="/image/item_2.jpg" alt="" class="swiper"></swiper-slide>
-                <swiper-slide><img src="/image/item_3.jpg" alt="" class="swiper"></swiper-slide>
-                <swiper-slide><img src="/image/item_4.jpg" alt="" class="swiper"></swiper-slide>
-            </swiper>
-        </aside>
-        <article>
-            <div class="left"></div>
-            <div class="right">
-                <h1>Kitsch學院風鈕扣A字百褶裙</h1>
+  <!-- 商品存在時才渲染 -->
+  <section v-if="product" class="product-detail">
 
-                <form action="" method="get">
-                    <label for="color"></label>
-                    <div class="color-options">
-                        <input type="radio" name="color" value="black" id="black">
-                        <label for="black">
-                            <div class="black"></div>
-                        </label>
+    <!-- 商品圖片區 -->
+    <div class="product-detail__images">
+      <!-- 主圖片 -->
+      <img :src="currentImage" :alt="product.name" class="main-image" />
 
-                        <input type="radio" name="color" value="brown" id="brown">
-                        <label for="brown">
-                            <div class="brown"></div>
-                        </label>
-                    </div>
-                    <label for="size"></label>
-                    <div class="size-options">
-                        <input type="radio" name="size" value="S" id="S">
-                        <label for="S">
-                            <div class="S">
-                                <p>S</p>
-                            </div>
-                        </label>
-                        <input type="radio" name="size" value="M" id="M">
-                        <label for="M">
-                            <div class="M">
-                                <p>M</p>
-                            </div>
-                        </label>
-                        <input type="radio" name="size" value="L" id="L">
-                        <label for="L">
-                            <div class="L">
-                                <p>L</p>
-                            </div>
-                        </label>
-                    </div>
-                    <label for="number"></label>
-                    <div class="number_select">
-                        <input type="number" name="number" id="number">
-                    </div>
-                </form>
-            </div>
-        </article>
-    </main>
+      <!-- 縮圖切換區 -->
+      <div class="thumbnail-group">
+        <img v-for="img in product.images" :key="img.image_url" :src="img.image_url" class="thumbnail"
+          :class="{ active: currentImage === img.image_url }" @click="currentImage = img.image_url" />
+      </div>
+    </div>
+
+    <!-- 商品資訊區 -->
+    <div class="product-detail__info">
+      <h1>{{ product.name }}</h1>
+      <p class="product-price">NT${{ product.price }}</p>
+      <p>{{ product.description }}</p>
+
+      <!-- 尺寸選擇 -->
+      <div class="options">
+        <label>尺寸：</label>
+        <select v-model="selectedSize">
+          <option v-for="size in product.sizes" :key="size">{{ size }}</option>
+        </select>
+      </div>
+
+      <!-- 顏色選擇 -->
+      <div class="options">
+        <label>顏色：</label>
+        <select v-model="selectedColor">
+          <option v-for="color in product.colors" :key="color">{{ color.color_name }}</option>
+        </select>
+      </div>
+
+      <!-- 加入購物車按鈕 -->
+      <button class="add-to-cart" @click="addToCart">加入購物車</button>
+    </div>
+  </section>
 </template>
 
 <script setup>
-import { Swiper, SwiperSlide } from 'swiper/vue';
+import { ref, onMounted } from 'vue'
+import { useRoute } from 'vue-router'
+import axios from 'axios'
+import { useCartStore } from '@/stores/cartStore'
+import Swal from 'sweetalert2'
 
-import 'swiper/css';
+const cart = useCartStore()
 
-import 'swiper/css/navigation';
+const route = useRoute()
+const product = ref(null)
+const currentImage = ref('')
+const selectedSize = ref('')
+const selectedColor = ref('')
 
-import { Navigation } from 'swiper/modules';
-const modules = [Navigation]
+onMounted(async () => {
+  const productId = route.params.id
+  const res = await axios.get(`http://localhost/belleu/public/api/getProduct.php?id=${productId}`)
+  product.value = res.data
 
+  // 設定初始圖、尺寸與顏色
+  currentImage.value = product.value.images.find(img => img.is_main)?.image_url || product.value.images[0].image_url
+  selectedSize.value = product.value.sizes[0] || ''
+  selectedColor.value = product.value.colors[0]?.color_name || ''
+})
+
+const addToCart = () => {
+  const item = {
+    id: product.value.id,
+    name: product.value.name,
+    image: currentImage.value,
+    price: product.value.price,
+    quantity: 1,
+    sizes: product.value.sizes || [],
+    colors: product.value.colors || [],
+    selectedSize: selectedSize.value,
+    selectedColor: selectedColor.value
+  }
+
+  console.log('🧾 加入購物車資料：', item) // ← 加這行！
+  cart.addItem(item)
+  cart.save() 
+
+  Swal.fire({
+    icon: 'success',
+    title: '已加入購物車',
+    text: `${item.name}（${item.selectedSize} / ${item.selectedColor}）`,
+    timer: 1500,
+    showConfirmButton: false
+  })
+}
 </script>
 
+
 <style scoped>
-.left {
-    width: 50vw;
+.product-detail {
+  display: flex;
+  gap: 60px;
+  padding: 80px 150px;
+  background-color: white;
+  flex-wrap: wrap;
 }
 
-.right {
-    width: 50vw;
-    padding: 60px 100px;
-    box-sizing: border-box;
+.product-detail__images {
+  flex: 0.8;
+  min-width: 300px;
 }
 
-h1 {
-    font-weight: bold;
+.main-image {
+  width: 100%;
+  border-radius: 12px;
+  margin-bottom: 16px;
+  object-fit: cover;
+  transition: all 0.3s ease;
 }
 
-aside {
-    width: 50%;
-    position: fixed;
+.thumbnail-group {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 10px;
 }
 
-article {
-    display: flex;
-    width: 100%;
+.thumbnail {
+  width: 100%;
+  aspect-ratio: 1 / 1;
+  object-fit: cover;
+  border-radius: 6px;
+  border: 2px solid transparent;
+  cursor: pointer;
+  transition: border 0.2s ease;
 }
 
-.mySwiper {
-    height: 100vh;
+.thumbnail:hover {
+  border-color: #E5AAA3;
 }
 
-.swiper {
-    width: 100%;
+.thumbnail.active {
+  border-color: #E57C7C;
 }
 
-main {
-    display: flex;
+.product-detail__info {
+  flex: 1;
+  min-width: 300px;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  padding: 200px 50px;
 }
 
-::v-deep(.swiper-button-prev) {
-    left: 50px;
-    color: #4B4237;
-
+.product-name {
+  font-size: 24px;
+  font-weight: bold;
+  color: #4B4237;
 }
 
-::v-deep(.swiper-button-next) {
-    right: 50px;
-    color: #4B4237;
+.product-price {
+  font-size: 20px;
+  color: #E57C7C;
+  font-weight: bold;
 }
 
-.color-options {
-    display: flex;
-    gap: 10px;
+.product-description {
+  line-height: 1.6;
+  font-size: 16px;
+  color: #4B4237;
 }
 
-.color-options input[type="radio"] {
-    display: none;
+.options select {
+  padding: 8px;
+  border-radius: 4px;
+  border: 1px solid #aaa;
 }
 
-.color-options label {
-    padding: 3px;
-    border: 1px solid white;
-    cursor: pointer;
-    user-select: none;
-    transition: all 0.2s ease;
+.add-to-cart {
+  margin-top: 16px;
+  background-color: #E5AAA3;
+  color: white;
+  padding: 10px 20px;
+  border-radius: 8px;
+  font-weight: 600;
+  border: none;
+  cursor: pointer;
 }
 
-.color-options label div {
-    width: 14px;
-    height: 14px;
+.add-to-cart:hover {
+  background-color: #d28d89;
 }
 
-.color-options input[type="radio"]:checked+label {
-    border: 1px solid black;
-    color: #fff;
-    border-color: #000;
-}
-
-.black {
-    background-color: black;
-}
-
-.brown {
-
-    background-color: rgb(91, 66, 48)
-}
-
-
-.size-options {
-    display: flex;
-    gap: 10px;
-}
-
-.size-options input[type="radio"] {
-    display: none;
-}
-
-.size-options label {
-    padding: 0px 10px;
-    border: 1px solid white;
-    cursor: pointer;
-    user-select: none;
-    transition: all 0.2s ease;
-    box-sizing: border-box;
-}
-
-.size-options input[type="radio"]:checked+label {
-    border: 1px solid black;
-    color: black;
-    border-color: #000;
-}
-
-p {
-    font-size: 12px;
+@media (max-width: 768px) {
+  .product-detail {
+    flex-direction: column;
+    padding: 40px 24px;
+  }
 }
 </style>

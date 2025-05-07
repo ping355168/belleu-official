@@ -1,10 +1,10 @@
 <template>
-    <div class="promo-banner">下載app隨時領取最新優惠資訊！</div>
+    <!-- App 下載推廣橫幅 -->
+    <div class="promo-banner">
+        下載 app 隨時領取最新優惠資訊！
+    </div>
 </template>
 
-<script setup>
-
-</script>
 
 <style scoped>
 .promo-banner {
