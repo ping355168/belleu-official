@@ -3,8 +3,23 @@ header('Content-Type: application/json');
 header("Access-Control-Allow-Origin: *");
 header("Access-Control-Allow-Headers: Content-Type");
 
-// 連接資料庫
-require_once __DIR__ . '/../config/database.php';
+$host = 'localhost';
+$db = 'belleu';
+$user = 'root';
+$pass = 'password';
+$charset = 'utf8mb4';
+
+$dsn = "mysql:host=$host;dbname=$db;charset=$charset";
+$options = [
+    PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
+    PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
+];
+
+try {
+    $pdo = new PDO($dsn, $user, $pass, $options);
+} catch (Exception $e) {
+    die('資料庫連線錯誤：' . $e->getMessage());
+}
 
 // 取得前端傳來的資料
 $data = json_decode(file_get_contents('php://input'), true);

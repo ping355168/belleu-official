@@ -72,7 +72,7 @@ function updateHeight() {
 // 畫面初始化時載入商品資料與設定 resize 事件
 onMounted(async () => {
     try {
-        const res = await axios.get('http://localhost/belleu/public/api/getProducts.php')
+        const res = await axios.get('http://localhost/belleu/api/getProducts.php')
         products.value = res.data
         updateHeight()
         setTimeout(updateHeight, 100) // 等待圖片載入再更新高度

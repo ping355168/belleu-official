@@ -59,7 +59,7 @@ const selectedColor = ref('')
 
 onMounted(async () => {
   const productId = route.params.id
-  const res = await axios.get(`http://localhost/belleu/public/api/getProduct.php?id=${productId}`)
+  const res = await axios.get(`http://localhost/belleu/api/getProduct.php?id=${productId}`)
   product.value = res.data
 
   // 設定初始圖、尺寸與顏色. 

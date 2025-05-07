@@ -42,14 +42,14 @@ const handleRegister = async () => {
 
     try {
         // 👉 註冊請求
-        const res = await axios.post('http://localhost/belleu/src/auth/register.php', {
+        const res = await axios.post('http://localhost/belleu/api/register.php', {
             email: email.value,
             password: password.value,
         })
 
         if (res.data.success) {
             // 👉 自動登入
-            const loginRes = await axios.post('http://localhost/belleu/src/auth/login.php', {
+            const loginRes = await axios.post('http://localhost/belleu/api/login.php', {
                 email: email.value,
                 password: password.value,
             })

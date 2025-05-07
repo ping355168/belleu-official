@@ -64,7 +64,7 @@ const submitOrder = async () => {
   }
 
   try {
-    const response = await fetch('http://localhost/belleu/public/api/place_order.php', {
+    const response = await fetch('http://localhost/belleu/api/place_order.php', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({

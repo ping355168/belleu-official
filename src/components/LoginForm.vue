@@ -54,7 +54,7 @@ const handleLogin = async () => {
     }
 
     try {
-        const res = await axios.post('http://localhost/belleu/src/auth/login.php', {
+        const res = await axios.post('http://localhost/belleu/api/login.php', {
             email: email.value,
             password: password.value,
         })

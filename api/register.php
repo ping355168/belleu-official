@@ -1,10 +1,29 @@
 <?php
-header('Content-Type: application/json');
 header("Access-Control-Allow-Origin: *");
 header("Access-Control-Allow-Headers: Content-Type");
+header("Access-Control-Allow-Methods: POST, OPTIONS");
 
-// 資料庫連線
-require_once __DIR__ . '/../config/database.php';
+if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
+    http_response_code(200);
+    exit;
+}
+$host = 'localhost';
+$db = 'belleu';
+$user = 'root';
+$pass = 'password';
+$charset = 'utf8mb4';
+
+$dsn = "mysql:host=$host;dbname=$db;charset=$charset";
+$options = [
+    PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
+    PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
+];
+
+try {
+    $pdo = new PDO($dsn, $user, $pass, $options);
+} catch (Exception $e) {
+    die('資料庫連線錯誤：' . $e->getMessage());
+}
 
 // 接收 JSON 請求
 $data = json_decode(file_get_contents('php://input'), true);
