@@ -7,23 +7,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
     http_response_code(200);
     exit;
 }
-$host = 'localhost';
-$db = 'belleu';
-$user = 'root';
-$pass = 'password';
-$charset = 'utf8mb4';
 
-$dsn = "mysql:host=$host;dbname=$db;charset=$charset";
-$options = [
-    PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
-    PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
-];
-
-try {
-    $pdo = new PDO($dsn, $user, $pass, $options);
-} catch (Exception $e) {
-    die('資料庫連線錯誤：' . $e->getMessage());
-}
+// 引入資料庫連線設定（PostgreSQL）
+require_once __DIR__ . '/../config/database.php';
 
 // 接收 JSON 請求
 $data = json_decode(file_get_contents('php://input'), true);
@@ -36,17 +22,34 @@ if (!$email || !$password) {
     exit;
 }
 
-// 檢查 email 是否已存在
-$stmt = $pdo->prepare("SELECT id FROM users WHERE email = ?");
-$stmt->execute([$email]);
-if ($stmt->fetch()) {
-    echo json_encode(['success' => false, 'message' => 'Email 已被註冊']);
+// 驗證 email 格式
+if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
+    echo json_encode(['success' => false, 'message' => 'Email 格式錯誤']);
     exit;
 }
 
-// 儲存加密密碼
-$hashedPassword = password_hash($password, PASSWORD_DEFAULT);
-$insert = $pdo->prepare("INSERT INTO users (email, password) VALUES (?, ?)");
-$success = $insert->execute([$email, $hashedPassword]);
+// 驗證密碼強度（可自定義更嚴格）
+if (strlen($password) < 6) {
+    echo json_encode(['success' => false, 'message' => '密碼至少需要 6 個字元']);
+    exit;
+}
 
-echo json_encode(['success' => $success]);
+try {
+    // 檢查 email 是否已存在
+    $stmt = $pdo->prepare("SELECT id FROM users WHERE email = ?");
+    $stmt->execute([$email]);
+    if ($stmt->fetch()) {
+        echo json_encode(['success' => false, 'message' => 'Email 已被註冊']);
+        exit;
+    }
+
+    // 儲存加密密碼
+    $hashedPassword = password_hash($password, PASSWORD_DEFAULT);
+    $insert = $pdo->prepare("INSERT INTO users (email, password) VALUES (?, ?)");
+    $success = $insert->execute([$email, $hashedPassword]);
+
+    echo json_encode(['success' => $success]);
+} catch (Exception $e) {
+    http_response_code(500);
+    echo json_encode(['success' => false, 'message' => '註冊失敗：' . $e->getMessage()]);
+}

@@ -73,6 +73,7 @@ function updateHeight() {
 onMounted(async () => {
     try {
         const res = await axios.get('http://localhost/belleu/api/getProducts.php')
+        console.log('🔥 products:', typeof res.data, res.data)
         products.value = res.data
         updateHeight()
         setTimeout(updateHeight, 100) // 等待圖片載入再更新高度

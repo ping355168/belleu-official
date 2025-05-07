@@ -2,26 +2,10 @@
 header('Content-Type: application/json');
 header('Access-Control-Allow-Origin: *');
 
-$host = 'localhost';
-$db = 'belleu';
-$user = 'root';
-$pass = 'password';
-$charset = 'utf8mb4';
+// 引入資料庫連線設定
+require_once __DIR__ . '/../config/database.php';
 
-$dsn = "mysql:host=$host;dbname=$db;charset=$charset";
-$options = [
-    PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
-    PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
-];
-
-try {
-    $pdo = new PDO($dsn, $user, $pass, $options);
-} catch (Exception $e) {
-    die('資料庫連線錯誤：' . $e->getMessage());
-}
-
-
-
+// 檢查是否有傳入 id
 $id = $_GET['id'] ?? null;
 
 if (!$id) {
@@ -30,8 +14,6 @@ if (!$id) {
 }
 
 try {
-    $pdo = new PDO($dsn, $user, $pass, $options);
-
     // 取得商品主資料
     $stmt = $pdo->prepare("SELECT * FROM products WHERE id = ?");
     $stmt->execute([$id]);
@@ -59,5 +41,6 @@ try {
 
     echo json_encode($product);
 } catch (Exception $e) {
+    http_response_code(500);
     echo json_encode(['error' => $e->getMessage()]);
 }
