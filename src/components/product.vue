@@ -62,7 +62,8 @@ onMounted(async () => {
   const res = await axios.get(`http://localhost/belleu/public/api/getProduct.php?id=${productId}`)
   product.value = res.data
 
-  // 設定初始圖、尺寸與顏色
+  // 設定初始圖、尺寸與顏色. 
+
   currentImage.value = product.value.images.find(img => img.is_main)?.image_url || product.value.images[0].image_url
   selectedSize.value = product.value.sizes[0] || ''
   selectedColor.value = product.value.colors[0]?.color_name || ''
